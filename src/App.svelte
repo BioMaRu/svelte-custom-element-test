@@ -1,4 +1,7 @@
 <script>
+    import { onMount, beforeUpdate, afterUpdate } from 'svelte';
+
+    let el;
     export let appearance = '';
     export let disabled = false;
     export let fluid = false;
@@ -8,10 +11,32 @@
     export let loading = false;
     export let raised = false;
     export let size = '';
-    // export let type;
+    export let type = '';
+
+    onMount (() => {
+        const host = el.parentNode.host
+        const type = host.getAttribute('type')
+        const targetButton = document.createElement('button')
+
+        targetButton.style.display = 'none'
+
+        if (type) {
+            targetButton.type = type
+        }
+
+		host.append(targetButton)
+    })
+
+    function handleClick () {
+        const host = el.parentNode.host
+        const targetButton = host.querySelector('button')
+        targetButton.click()
+    }
 </script>
 
 <button
+    bind:this={el}
+    on:click={handleClick}
     disabled={disabled}
     class:disabled={disabled || disabled === ''}
     class:big={size === 'big'}
@@ -28,7 +53,11 @@
     {#if icon && icon !== ''}
         <span class="material-icons">{icon}</span>
     {/if}
-    {label}
+    {#if label && label !== ''}
+        {label}
+    {:else}
+        <slot></slot>
+    {/if}
 </button>
 
 <style>
